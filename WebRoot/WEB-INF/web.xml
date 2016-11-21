@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<!-- 3 配置全局中文乱码过滤器
+	<filter>
+		<filter-name>EncodelFilter</filter-name>
+		<filter-class>com.itheima.crm.web.filter.EncodelFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>EncodelFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	 -->
+
+	<!-- spring过滤器，延迟session关闭，必须放在struts前端控制器之前  -->
+	<filter>
+		<filter-name>openSession</filter-name>
+		<filter-class>org.springframework.orm.hibernate3.support.OpenSessionInViewFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>openSession</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- 1.1 spring配置文件位置
+		方式1：
+			<param-value>classpath:spring/applicationContext.xml</param-value>
+			需要在applicationContext.xml中使用import导入其它配置文件
+		方式2：
+			<param-value>classpath:spring/applicationContext*.xml</param-value>
+			不需要在applicationContext.xml中使用import导入其它配置文件，但是不推荐使用，因为maven不识别*（通配符）
+	 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:spring/applicationContext.xml</param-value>
+	</context-param>
+
+	<!-- 1.2 加载spring配置文件使用监听器 -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	
+	<!-- 2 配置struts2的前端控制器 -->
+	<filter>
+		<filter-name>struts2</filter-name>
+		<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>struts2</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>

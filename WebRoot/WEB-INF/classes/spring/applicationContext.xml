@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context.xsd
+						http://www.springframework.org/schema/aop 
+						http://www.springframework.org/schema/aop/spring-aop.xsd
+						http://www.springframework.org/schema/tx 
+						http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- 公共配置项 -->
+	<!-- 1 数据库信息文件 -->
+	<context:property-placeholder location="classpath:dbinfo.properties"/>
+	
+	<!-- 2 数据源 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${driverClass}"></property>
+		<property name="jdbcUrl" value="${jdbcUrl}"></property>
+		<property name="user" value="${user}"></property>
+		<property name="password" value="${password}"></property>
+	</bean>
+	
+	<!-- 3 sessionFactory -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+			</props>
+		</property>
+		<property name="mappingLocations" value="classpath:com/lqr/domain/*.hbm.xml"></property>
+	</bean>
+	
+	<!-- 4 事务 -->
+	<!-- 4.1 事务管理器 -->
+	<bean id="tvManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<!-- 4.2 事务详情 
+		增、删、改：读写		查：只读
+	-->
+	<tx:advice id="txAdvice" transaction-manager="tvManager">
+		<tx:attributes>
+			<tx:method name="add*"/>
+			<tx:method name="delete*"/>
+			<tx:method name="update*"/>
+			<tx:method name="find*" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 4.3 AOP编程 -->
+	<aop:config>
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* com.lqr.service..*.*(..))"/>
+	</aop:config>
+	
+	
+	<!-- 以上是不使用注解的配置，以下是使用注解的配置，如需使用，上面的事务详情 、AOP编程与各Deo或Service的配置可以去掉！！ -->
+	<!-- 使组件注解生效@Component、@Repository、@Service、@Controller、@Autowired、@Qualifier()、@Resource()
+	<context:component-scan base-package="com.lqr"></context:component-scan> -->
+	<!-- 使用事务注解生效@transactional
+	<tx:annotation-driven transaction-manager="tvManager"/> -->
+
+	<!-- 使用import导入其它配置文件 -->
+	<import resource="applicationContext-coursetype.xml" />
+	<import resource="applicationContext-classes.xml" />
+
+</beans>
